@@ -15,6 +15,7 @@ parser.add_argument('--read_i5', help='Path to read2')
 parser.add_argument('--read2', help='Path to read3')
 parser.add_argument('--tn5', help='Path to Tn5 i5 index FASTA file')
 parser.add_argument('--output', help='Path to output directory')
+parser.add_argument('--fname', help='Fastq Prefix to use for output file')
 args = parser.parse_args()
 
 
@@ -69,9 +70,10 @@ unique_i5_marks = [tn5_i5_barcodes[key] for key in tn5_i5_barcodes.keys()]
 unique_i5_marks.append('unknown')
 for i5 in unique_i5_marks:
     # outputting uncompressed fastq is ~10x faster
-    fname_1 = open(outpath / (i5 + ".R1.fastq"), "w+")
-    fname_2 = open(outpath / (i5 + ".R2.fastq"), "w+")
-    outf[i5] = (fname_1, fname_2)
+    fname_1 = open(outpath / (args.fname + "." + i5 + ".R1.fastq"), "w+")
+    fname_2 = open(outpath / (args.fname + "." + i5 + ".R2.fastq"), "w+")
+    fname_3 = open(outpath / (args.fname + "." + i5 + ".R3.fastq"), "w+")
+    outf[i5] = (fname_1, fname_2, fname_3)
 
 x = 0
 while True:
@@ -83,7 +85,7 @@ while True:
         break
 
     # get barcodes
-    tn5_barcode, cell_barcode = extract_barcodes_simple(sequence=i5_entry[1], bc1_len=8)
+    tn5_barcode, _ = extract_barcodes_simple(sequence=i5_entry[1], bc1_len=8)
 
     if tn5_barcode in tn5_i5_barcodes.keys():
         mark = tn5_i5_barcodes[tn5_barcode]
@@ -95,21 +97,25 @@ while True:
         else:
             mark = "unknown"
 
-    # add barcodes to r1 and r2 genomic
-    bc_combination = "@" + cell_barcode + ":" + tn5_barcode + "+"
-    r1_entry[0] = bc_combination + r1_entry[0][1:]
-    r2_entry[0] = bc_combination + r2_entry[0][1:]
+#     # add barcodes to r1 and r2 genomic
+#     bc_combination = "@" + cell_barcode + ":" + tn5_barcode + "+"
+#     r1_entry[0] = bc_combination + r1_entry[0][1:]
+#     r2_entry[0] = bc_combination + r2_entry[0][1:]
 
     if mark == "unknown":
         r1_outf = outf['unknown'][0]
         r2_outf = outf['unknown'][1]
+        r3_outf = outf['unknown'][2]
     else:
         # write to correct output files based on barcode combination
         r1_outf = outf[mark][0]
         r2_outf = outf[mark][1]
+        r3_outf = outf[mark][2]
 
     r1_outf.write("".join(r1_entry))
     r2_outf.write("".join(r2_entry))
+    r3_outf.write("".join(i5_entry))
+    
     x += 1
     if x % 1e6 == 0:
         print("Processed " + str(int(x/1e6)) + " million reads", file=sys.stderr, end="\r")
