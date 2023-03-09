@@ -124,3 +124,4 @@ while True:
 for i in outf.keys():
     outf[i][0].close()
     outf[i][1].close()
+    outf[i][2].close()
