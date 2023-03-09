@@ -71,9 +71,9 @@ unique_i5_marks.append('unknown')
 for i5 in unique_i5_marks:
     # outputting uncompressed fastq is ~10x faster
     fname_1 = open(outpath / (args.fname + "." + i5 + ".R1.fastq"), "w+")
-    fname_2 = open(outpath / (args.fname + "." + i5 + ".R2.fastq"), "w+")
-    fname_3 = open(outpath / (args.fname + "." + i5 + ".R3.fastq"), "w+")
-    outf[i5] = (fname_1, fname_2, fname_3)
+    fname_2 = open(outpath / (args.fname + "." + i5 + ".R3.fastq"), "w+")
+    fname_i5 = open(outpath / (args.fname + "." + i5 + ".R2.fastq"), "w+")
+    outf[i5] = (fname_1, fname_2, fname_i5)
 
 x = 0
 while True:
